@@ -24,8 +24,22 @@ It is made for my own use, so no warranties or anything. It works on my Debian
 requests to make it more generic. See the LICENSE file for copying information
 (spoiler: GPLv3).
 
+    This ansible role is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 This role was made on basis of a [holo][0] package made by
-[Stefan Majewsky][1], which fulfills about the same purpose.
+[Stefan Majewsky][1], which fulfills about the same purpose. Conversion to
+ansible done by me.
 
    [0]: https://github.com/majewsky/holo
    [1]: https://github.com/majewsky
