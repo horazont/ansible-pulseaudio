@@ -1,0 +1,163 @@
+---
+- name: install pulseaudio and dependencies
+  apt: name={{ item }} state=latest
+  with_items:
+  - pulseaudio
+  - pulseaudio-utils
+  - pulseaudio-module-zeroconf
+  - avahi-daemon
+  tags:
+  - pulse
+
+- name: create multimedia group
+  group: name=multimedia
+         state=present
+  tags:
+  - pulse
+
+- name: create multimedia user
+  user: name=multimedia
+        state=present
+        home=/home/multimedia
+        group=multimedia
+        groups=audio
+  tags:
+  - pulse
+
+- name: deploy user systemd unit files
+  copy: src=systemd/{{ item }}
+        dest=/etc/systemd/{{ item }}
+        owner=root
+        group=root
+        mode=ug=rw,o=r
+  with_items:
+  - user/dbus.socket
+  - user/dbus.service
+  - user/pulseaudio.socket
+  - user/pulseaudio.service
+  tags:
+  - pulse
+
+- name: ensure presence of systemd target wants
+  file: state=directory
+        path="/etc/systemd/{{ item }}"
+        owner=root
+        group=root
+        mode=ug=rw,o=r
+  with_items:
+  - user/sockets.target.wants
+  - system/sockets.target.wants
+  - system/multi-user.target.wants
+  tags:
+  - pulse
+
+- name: ensure presence of user systemd target wants
+  file: state=directory
+        path="/home/multimedia/.config/systemd/user/{{ item }}.target.wants"
+        owner=multimedia
+        group=multimedia
+        mode=ug=rwx,o=rx
+  with_items:
+  - sockets
+  - default
+  tags:
+  - pulse
+
+- name: ensure presence of user@.service.d
+  file: state=directory
+        path=/etc/systemd/system/user@service.d
+        owner=root
+        group=root
+        mode=ug=rw,o=r
+  tags:
+  - pulse
+
+- name: enable user systemd units
+  file: state=link
+        path=/etc/systemd/user/sockets.target.wants/{{ item }}
+        src=/etc/systemd/user/{{ item }}
+  with_items:
+  - dbus.socket
+  tags:
+  - pulse
+
+- name: start and enable avahi
+  service: name=avahi-daemon state=started enabled=yes
+  tags:
+  - pulse
+
+- name: deploy user environment config
+  copy: src=systemd/system/user@.service.d/dbus.conf
+        dest=/etc/systemd/system/user@.service.d/
+        owner=root
+        group=root
+        mode=ug=rw,o=r
+  tags:
+  - pulse
+
+- name: enable multimedia user systemd units
+  file: state=absent
+        path=/home/multimedia/.config/systemd/user/sockets.target.wants/{{ item }}
+        src=/etc/systemd/user/{{ item }}
+  with_items:
+  - pulseaudio.socket
+  tags:
+  - pulse
+
+- name: enable multimedia user systemd units
+  file: state=link
+        path=/home/multimedia/.config/systemd/user/default.target.wants/{{ item }}
+        src=/etc/systemd/user/{{ item }}
+  with_items:
+  - pulseaudio.service
+  tags:
+  - pulse
+
+- name: ensure presence of pulseaudio directory
+  file: state=directory
+        path=/home/multimedia/.config/pulse/
+        owner=multimedia
+        group=multimedia
+        mode=ug=rwx,o-rwx
+  tags:
+  - pulse
+
+- name: deploy pulseaudio configuration
+  copy: src=pulse/{{item}}
+        dest=/home/multimedia/.config/pulse/
+        owner=multimedia
+        group=multimedia
+        mode=ug=rwx,o-rwx
+  with_items:
+  - default.pa
+  tags:
+  - pulse
+
+- name: deploy global pulseaudio configuration
+  copy: src=pulse-global/{{item}}
+        dest=/etc/pulse/
+        owner=multimedia
+        group=multimedia
+        mode=ug=rwx,o-rwx
+  with_items:
+  - daemon.conf
+  tags:
+  - pulse
+
+- name: configure firewall
+  copy: src=ferm/{{ item }}.conf
+        dest=/etc/ferm/ferm.d/
+        owner=root
+        group=root
+        mode=ug=rw,o-rwx
+  with_items:
+  - 10-pulseaudio
+  - 10-avahi
+  tags:
+  - pulse
+  notify: run ferm
+
+- name: let pulse user linger
+  command: loginctl enable-linger multimedia
+  tags:
+  - pulse
