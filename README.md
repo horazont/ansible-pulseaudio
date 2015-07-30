@@ -8,6 +8,17 @@ This is a simple ansible role which offers the following features:
 * run a pulseaudio in that user session
 * make that pulseaudio offer network services
 
+Quirks
+------
+
+* Everything is hardcoded (I accept PRs to change that!)
+* Upon change of any configuration, the pulseaudio daemon is not restarted or
+  anything. I don’t know how to fix this (it runs in a user systemd), PRs
+  appreciated.
+
+License and attributions
+------------------------
+
 It is made for my own use, so no warranties or anything. It works on my Debian
 8 deployment. Feel free to use this for your own configuration or make pull
 requests to make it more generic. See the LICENSE file for copying information
