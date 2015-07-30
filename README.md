@@ -15,6 +15,9 @@ Quirks
 * Upon change of any configuration, the pulseaudio daemon is not restarted or
   anything. I don’t know how to fix this (it runs in a user systemd), PRs
   appreciated.
+* While the unit files for socket activation are in this repository, I had to
+  disable it; Pulseaudio 5.0 (which ships with debian jessie) cannot into
+  socket activation yet.
 
 License and attributions
 ------------------------

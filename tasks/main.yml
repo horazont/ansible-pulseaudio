@@ -96,15 +96,6 @@
   - pulse
 
 - name: enable multimedia user systemd units
-  file: state=absent
-        path=/home/multimedia/.config/systemd/user/sockets.target.wants/{{ item }}
-        src=/etc/systemd/user/{{ item }}
-  with_items:
-  - pulseaudio.socket
-  tags:
-  - pulse
-
-- name: enable multimedia user systemd units
   file: state=link
         path=/home/multimedia/.config/systemd/user/default.target.wants/{{ item }}
         src=/etc/systemd/user/{{ item }}
